@@ -14,14 +14,7 @@ def main_screen():
     gui.geometry('700x570')
     gui.resizable(0, 0)
 
-    # def login_window():
-    #     login_screen = Tk()
-    #     login_screen.title(" LOGIN WINDOW ")
-    #     login_screen.geometry('200x200')
-    #     login_label = Label(login_window, "Please enter your login details")
-
-
-    # styling tab text
+    # styling tab's text
     s = ttk.Style()
     s.configure('TNotebook.Tab', font=('Comic Sans MS','10','bold'))
 
@@ -204,6 +197,13 @@ def main_screen():
 
     #---------------------------------------tab 2 (frame2)-----------------------------------
     def main_window2_tab2():
+        # function to exit the app
+        def exit():
+            MsgBox_exit = messagebox.askquestion ('WARNING','Are you sure you want to exit the app!!',icon = 'warning')
+            if MsgBox_exit == 'yes':
+                gui.destroy()
+            else:
+                messagebox.showinfo('Return','You will now return to the application screen')
 
         # function for clear screen
         def clear_screen():
@@ -367,7 +367,7 @@ def main_screen():
         scrollbar.grid(row=0, column=0, sticky=S + E + N)
 
         # exit button
-        button_exit = Button(f4_2, text=' EXIT ', font=(None, 13, 'bold'), border=4, command=gui.destroy)
+        button_exit = Button(f4_2, text=' EXIT ', font=(None, 13, 'bold'), border=4, command=exit)
         button_exit.grid(row=0, column=2, padx=100, pady=20)
 
         # button to clear the tree_view1
