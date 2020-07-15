@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter.ttk import Notebook, Treeview
@@ -244,73 +245,84 @@ def main_screen():
         def delete_record():
             connect = sqlite3.connect("expense.db")
             cursor = connect.cursor()
-            for selected_item in tree_view1.selection():
-                print(selected_item)      # it prints the selected row id
-                cursor.execute("DELETE FROM expense_table WHERE date=? AND title=? AND expense=?", (tree_view1.set(selected_item, '#1'), tree_view1.set(selected_item, '#2'), tree_view1.set(selected_item, '#3')))
-                connect.commit()
-                tree_view1.delete(selected_item)
+            # if else stmt to check if there is record selected or not
+            if tree_view1.selection():
+                # warning window for delete all button 
+                MsgBox = messagebox.askquestion ('DELETE SELECTED RECORD','Are you sure you want to delete the selected records !!',icon = 'warning')
+                if MsgBox == 'yes':
+                        for selected_item in tree_view1.selection():
+                            print(selected_item)      # it prints the selected row id
+                            cursor.execute("DELETE FROM expense_table WHERE date=? AND title=? AND expense=?", (tree_view1.set(selected_item, '#1'), tree_view1.set(selected_item, '#2'), tree_view1.set(selected_item, '#3')))
+                            connect.commit()
+                            tree_view1.delete(selected_item)
+                else:
+                    messagebox.showinfo('Return','You will now return to the application screen')
+            else:
+                messagebox.showinfo('WARNING','There is no record selected !!')
 
 
         # to define an edit function
         def edit_record():
-            # local variables
-            edited_date = StringVar()
-            edited_title = StringVar()
-            edited_expense = StringVar()
+            # to check if there is a record selected or not
+            if tree_view1.selection():
+                # local variables
+                edited_date = StringVar()
+                edited_title = StringVar()
+                edited_expense = StringVar()
 
-            # to get the editable item from the tree_view1
-            editable_item = tree_view1.selection()
+                # to get the editable item from the tree_view1
+                editable_item = tree_view1.selection()
+                # defining update function
+                def update():
+                    edited_date = edit_e_date.get()
+                    edited_title = edit_e_title.get()
+                    edited_expense = edit_e_expense.get()
+                    # connecting to sqlite database
+                    connect = sqlite3.connect("expense.db")
+                    cursor = connect.cursor()
 
-            # defining update function
-            def update():
-                edited_date = edit_e_date.get()
-                edited_title = edit_e_title.get()
-                edited_expense = edit_e_expense.get()
-                # connecting to sqlite database
-                connect = sqlite3.connect("expense.db")
-                cursor = connect.cursor()
+                    for x in editable_item:
+                        # database stuff
+                        cursor.execute("UPDATE expense_table SET date=?, title=?, expense=? WHERE date=? AND title=? AND expense=?", (edited_date, edited_title, edited_expense, tree_view1.set(editable_item, '#1'), tree_view1.set(editable_item, '#2'), tree_view1.set(editable_item, '#3')))
+                        connect.commit()
+                        # replacing the selected row with new inputs(edit_e_date, edit_e_title, edit_e_expense)
+                        tree_view1.item(x, values=(edited_date, edited_title, edited_expense))   # to edit the selected item in the tree_view1
+                    
+                    # to exit the edit window
+                    new_edit_Window.destroy()
 
-                for x in editable_item:
-                    # database stuff
-                    cursor.execute("UPDATE expense_table SET date=?, title=?, expense=? WHERE date=? AND title=? AND expense=?", (edited_date, edited_title, edited_expense, tree_view1.set(editable_item, '#1'), tree_view1.set(editable_item, '#2'), tree_view1.set(editable_item, '#3')))
-                    connect.commit()
-                    # replacing the selected row with new inputs(edit_e_date, edit_e_title, edit_e_expense)
-                    tree_view1.item(x, values=(edited_date, edited_title, edited_expense))   # to edit the selected item in the tree_view1
-                
-                # to exit the edit window
-                new_edit_Window.destroy()
+                # edit popup window to edit the items
+                new_edit_Window = Toplevel(f3)
+                new_edit_Window.title("EDIT TOOL WINDOW :")
+                new_edit_Window.geometry("590x170")
 
-            # edit popup window to edit the items
-            new_edit_Window = Toplevel(f3)
-            new_edit_Window.title("EDIT TOOL WINDOW :")
-            new_edit_Window.geometry("590x170")
+                # frame for the new opened window
+                edit_frame = Frame(new_edit_Window, bg="light grey")
+                edit_frame.pack(fill="both", expand=1, padx=10, pady=10)
 
-            # frame for the new opened window
-            edit_frame = Frame(new_edit_Window, bg="light grey")
-            edit_frame.pack(fill="both", expand=1, padx=10, pady=10)
+                edit_l_date = ttk.Label(edit_frame, text='DATE : ', font=(None, 13, 'bold'), background="light grey")
+                edit_l_date.grid(row=0, column=0, padx=15, pady=5, sticky='w')
 
-            edit_l_date = ttk.Label(edit_frame, text='DATE : ', font=(None, 13, 'bold'), background="light grey")
-            edit_l_date.grid(row=0, column=0, padx=15, pady=5, sticky='w')
+                edit_e_date = DateEntry(edit_frame, width=10, font=(None, 13, 'bold'),  textvariable=edited_date)
+                edit_e_date.grid(row=1, column=0, padx=15, pady=5, sticky='w')
 
-            edit_e_date = DateEntry(edit_frame, width=10, font=(None, 13, 'bold'),  textvariable=edited_date)
-            edit_e_date.grid(row=1, column=0, padx=15, pady=5, sticky='w')
+                edit_l_title = ttk.Label(edit_frame, text='TITLE : ', font=(None, 13, 'bold'), background="light grey")
+                edit_l_title.grid(row=0, column=1, padx=15, pady=5, sticky='w')
 
-            edit_l_title = ttk.Label(edit_frame, text='TITLE : ', font=(None, 13, 'bold'), background="light grey")
-            edit_l_title.grid(row=0, column=1, padx=15, pady=5, sticky='w')
+                edit_e_title = ttk.Entry(edit_frame, width=20, font=(None, 13, 'bold'), textvariable=edited_title)
+                edit_e_title.grid(row=1, column=1, padx=15, pady=5, sticky='w')
 
-            edit_e_title = ttk.Entry(edit_frame, width=20, font=(None, 13, 'bold'), textvariable=edited_title)
-            edit_e_title.grid(row=1, column=1, padx=15, pady=5, sticky='w')
+                edit_l_expense = ttk.Label(edit_frame, text='EXPENSE : ', font=(None, 13, 'bold'), background="light grey")
+                edit_l_expense.grid(row=0, column=2, padx=15, pady=5, sticky='w') 
 
-            edit_l_expense = ttk.Label(edit_frame, text='EXPENSE : ', font=(None, 13, 'bold'), background="light grey")
-            edit_l_expense.grid(row=0, column=2, padx=15, pady=5, sticky='w') 
+                edit_e_expense = ttk.Entry(edit_frame, width=20, font=(None, 13, 'bold'), textvariable=edited_expense)
+                edit_e_expense.grid(row=1, column=2, padx=15, pady=5, sticky='w')
 
-            edit_e_expense = ttk.Entry(edit_frame, width=20, font=(None, 13, 'bold'), textvariable=edited_expense)
-            edit_e_expense.grid(row=1, column=2, padx=15, pady=5, sticky='w')
-
-            # button to add the entered data into the database
-            update_button = Button(edit_frame, text='  UPDATE  ', font=(None, 14, 'bold'), border=6, command=update)
-            update_button.grid(row=2, column=2, padx=40, pady=15)
-
+                # button to add the entered data into the database
+                update_button = Button(edit_frame, text='  UPDATE  ', font=(None, 14, 'bold'), border=6, command=update)
+                update_button.grid(row=2, column=2, padx=40, pady=15)
+            else:
+                messagebox.showinfo('WARNING','There is no record selected !!')
 
 
         # -------------------------- row 0 (search) --------------------------------
